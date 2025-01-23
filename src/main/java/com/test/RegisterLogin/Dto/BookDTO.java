@@ -16,9 +16,18 @@ public class BookDTO {
     private int rating;
     private BigDecimal price; // New field
     private int quantity; // New field
+    private LocalDateTime createdAt;
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setPrice(BigDecimal price) {
@@ -38,7 +47,21 @@ public class BookDTO {
     public BookDTO() {
     }
 
-    public BookDTO(int bookId, String bookName, String description, int employeeId, String authorName, String categoryName, String isbnNo, int rating, BigDecimal price, int quantity) {
+//    public BookDTO(int bookId, String bookName, String description, int employeeId, String authorName, String categoryName, String isbnNo, int rating, BigDecimal price, int quantity) {
+//        this.bookId = bookId;
+//        this.bookName = bookName;
+//        this.description = description;
+//        this.employeeId = employeeId;
+//        this.authorName = authorName;
+//        this.categoryName = categoryName;
+//        this.isbnNo = isbnNo;
+//        this.rating = rating;
+//        this.price = price;
+//        this.quantity = quantity;
+//    }
+
+
+    public BookDTO(int bookId, String bookName, String description, int employeeId, String authorName, String categoryName, String isbnNo, int rating, BigDecimal price, int quantity, LocalDateTime createdAt) {
         this.bookId = bookId;
         this.bookName = bookName;
         this.description = description;
@@ -49,8 +72,8 @@ public class BookDTO {
         this.rating = rating;
         this.price = price;
         this.quantity = quantity;
+        this.createdAt = createdAt;
     }
-
 
     // Getters and Setters
     public int getBookId() {

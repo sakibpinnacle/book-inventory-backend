@@ -29,7 +29,5 @@ public interface BookRepo extends JpaRepository<Book, Integer> {
 
     List<Book> findByEmployeeEmployeeid(int employee);
 
-//    List<Author> findByAuthorNameAndEmployeeEmployeeid(String authorName, int employeeId);
-//    boolean existsByAuthorNameAndEmployeeEmployeeid(String authorName, int employeeId);
 
 }

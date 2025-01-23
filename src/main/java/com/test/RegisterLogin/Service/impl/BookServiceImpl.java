@@ -113,26 +113,7 @@ public class BookServiceImpl implements BookService {
         return bookRepo.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Override
-//    @Override
     public BookDTO updateBook(int id, BookDTO bookDTO) {
         Book book = bookRepo.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Book not found with ID: " + id)
@@ -188,50 +169,6 @@ public class BookServiceImpl implements BookService {
         Book updatedBook = bookRepo.save(book);
         return mapToDTO(updatedBook);
     }
-
-//    private BookDTO mapToDTO(Book book) {
-//        return new BookDTO(
-//                book.getBookId(),
-//                book.getBookName(),
-//                book.getDescription(),
-//                book.getEmployee().getEmployeeid(),
-//                book.getAuthor() != null ? book.getAuthor().getAuthorName() : null,
-//                book.getCategory() != null ? book.getCategory().getCategoryName() : null,
-//                book.getIsbnNo(),
-//                book.getRating(),
-//                book.getPrice(),
-//                book.getQuantity()
-//        );
-//    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Override
     public String deleteBook(int id) {
         Book book = bookRepo.findById(id).orElseThrow(() ->
@@ -259,9 +196,9 @@ public class BookServiceImpl implements BookService {
                 book.getIsbnNo(),
                 book.getRating(),
                 book.getPrice(), // New field
-                book.getQuantity()// New field
+                book.getQuantity(),// New field
+                book.getCreatedAt()
 //                book.getUpdatedAt()
-//                book.getCreatedAt(),
         );
     }
 }
