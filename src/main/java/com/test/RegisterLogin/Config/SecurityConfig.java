@@ -4,12 +4,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Properties;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
@@ -33,6 +37,13 @@ public class SecurityConfig {
 
         return mailSender;
     }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())  // Disable CSRF
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Allow all requests without authentication
+        return http.build();
+    }
 }
 
 
@@ -40,65 +51,24 @@ public class SecurityConfig {
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
 //import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.security.web.SecurityFilterChain;
-
-
-
-
 //
 //@Configuration
-//public class SecurityConfig {
-////
+//
+//public class SecurityConfig{
+//
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        http
-//                .csrf().disable() // Disable CSRF protection if not needed
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/public/**").permitAll() // Public endpoints
-//                        .anyRequest().authenticated() // All other endpoints require authentication
-//                )
-//                .httpBasic(); // Enable basic authentication
+//                .csrf(csrf -> csrf.disable())  // Disable CSRF
+//                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Allow all requests without authentication
 //        return http.build();
 //    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder(); // Use BCrypt for password encoding
-//    }
-//}
-//
-
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.core.userdetails.User;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-//
-//@Configuration
-//public class SecurityConfig {
-//
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user = User.withUsername("admin")
-//                .password(passwordEncoder().encode("password")) // Replace with your password
-//                .roles("USER")
-//                .build();
-//        return new InMemoryUserDetailsManager(user);
-//    }
-//
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
 //        return new BCryptPasswordEncoder();
 //    }
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf().disable()
-//                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Permit all requests
-//        return http.build();
-//    }
-//
 //}

@@ -23,6 +23,10 @@ public class AuthorServiceImpl implements AuthorService {
     private EmpoyeeRepo employeeRepo;
     @Override
     public AuthorDTO createAuthor(AuthorDTO authorDTO) {
+
+        if (authorDTO.getAuthorName() == null || authorDTO.getAuthorName().trim().isEmpty()) {
+            throw new IllegalArgumentException("author name cannot be empty.");
+        }
         if (authorRepo.existsByAuthorNameAndEmployeeEmployeeid(authorDTO.getAuthorName(), authorDTO.getEmployeeId())) {
             throw new IllegalArgumentException("Author with name already exists.");
         }
@@ -58,6 +62,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorDTO updateAuthor(int id, AuthorDTO authorDTO) {
+        if (authorDTO.getAuthorName() == null || authorDTO.getAuthorName().trim().isEmpty()) {
+            throw new IllegalArgumentException("author name cannot be empty.");
+        }
         // Fetch the existing author by ID
         Author author = authorRepo.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Author not found with ID: " + id)

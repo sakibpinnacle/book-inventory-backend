@@ -17,6 +17,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category createCategory(Category category) {
+        if (category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()) {
+            throw new IllegalArgumentException("author name cannot be empty.");
+        }
         // Check if category with the same name already exists for the given employee
         Optional<Category> existingCategory = categoryRepository.findByEmployeeIdAndCategoryName(category.getEmployeeId(), category.getCategoryName());
         if (existingCategory.isPresent()) {
@@ -27,6 +30,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category updateCategory(int categoryId, Category category) {
+        if (category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()) {
+            throw new IllegalArgumentException("author name cannot be empty.");
+        }
         // Check if the category exists
         Optional<Category> existingCategory = categoryRepository.findById(categoryId);
         if (existingCategory.isEmpty()) {

@@ -38,6 +38,13 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO createBook(BookDTO bookDTO) {
+        if (bookDTO.getBookName() == null || bookDTO.getBookName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Book name cannot be empty.");
+        }
+        if (bookDTO.getIsbnNo() == null || bookDTO.getIsbnNo().trim().isEmpty()) {
+            throw new IllegalArgumentException("ISBN number cannot be empty.");
+        }
+
         // Fetch the employee by ID
         Employee employee = employeeRepo.findById(bookDTO.getEmployeeId()).orElseThrow(() ->
                 new IllegalArgumentException("Employee not found with ID: " + bookDTO.getEmployeeId())
@@ -90,9 +97,16 @@ public class BookServiceImpl implements BookService {
         book.setIsbnNo(bookDTO.getIsbnNo());
         book.setPrice(bookDTO.getPrice());
         book.setQuantity(bookDTO.getQuantity());
-        book.setRating(bookDTO.getRating());
+//        book.setRating(bookDTO.getRating());
         book.setCreatedAt(LocalDateTime.now());
         book.setUpdatedAt(LocalDateTime.now());
+        if (bookDTO.getRating() != null) {
+            book.setRating(bookDTO.getRating());
+        } else {
+            // If rating is null, you can either set a default value or leave it as null
+            book.setRating(3); // Default rating if null, or just leave it as null depending on your needs
+        }
+
 
         Book savedBook = bookRepo.save(book);
         return mapToDTO(savedBook);
@@ -115,6 +129,15 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO updateBook(int id, BookDTO bookDTO) {
+
+        if (bookDTO.getBookName() == null || bookDTO.getBookName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Book name cannot be empty.");
+        }
+        if (bookDTO.getIsbnNo() == null || bookDTO.getIsbnNo().trim().isEmpty()) {
+            throw new IllegalArgumentException("ISBN number cannot be empty.");
+        }
+
+
         Book book = bookRepo.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Book not found with ID: " + id)
         );

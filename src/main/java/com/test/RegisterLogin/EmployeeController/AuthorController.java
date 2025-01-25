@@ -1,9 +1,8 @@
 package com.test.RegisterLogin.EmployeeController;
 
 import com.test.RegisterLogin.Dto.AuthorDTO;
-import com.test.RegisterLogin.Entity.Author;
 import com.test.RegisterLogin.Service.AuthorService;
-import com.test.RegisterLogin.Service.impl.AuthorServiceImpl;
+import com.test.RegisterLogin.Util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,117 +11,134 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-//
-//@RestController
-//@RequestMapping("api/v1/author")
-//public class AuthorController {
-//
-//    @Autowired
-//    private AuthorService authorService;
-//
-//    @PostMapping
-//    public ResponseEntity<AuthorDTO> createAuthor(@RequestBody AuthorDTO authorDTO) {
-//        return ResponseEntity.ok(authorService.createAuthor(authorDTO));
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable int id) {
-//        return ResponseEntity.ok(authorService.getAuthorById(id));
-//    }
-//
-//    @GetMapping
-//    public ResponseEntity<List<AuthorDTO>> getAllAuthors() {
-//        return ResponseEntity.ok(authorService.getAllAuthors());
-//    }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<AuthorDTO> updateAuthor(@PathVariable int id, @RequestBody AuthorDTO authorDTO) {
-//        return ResponseEntity.ok(authorService.updateAuthor(id, authorDTO));
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<String> deleteAuthor(@PathVariable int id) {
-//        return ResponseEntity.ok(authorService.deleteAuthor(id));
-//    }
-////    @Autowired
-//    private AuthorServiceImpl authorServiceImpl;
-//
-//
-//    //@Autowired
-////    private AuthorService authorService;
-//
-//    @GetMapping("/employee/{employeeId}")
-//    public ResponseEntity<?> getAuthorsByEmployeeId(@PathVariable int employeeId) {
-//        try {
-//            List<Author> authors = authorServiceImpl.getAuthorsByEmployeeId(employeeId);
-//            if (authors.isEmpty()) {
-//                return ResponseEntity.noContent().build();
-//            }
-//            return ResponseEntity.ok(authors);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error: " + e.getMessage());
-//        }
-//    }
-//}
 
-
-
-
-
+@CrossOrigin
 @RestController
 @RequestMapping("api/v1/author")
-@CrossOrigin
+//@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "Authorization", exposedHeaders = "Authorization")
 public class AuthorController {
 
     @Autowired
     private AuthorService authorService;
-    @Autowired
-    private AuthorServiceImpl authorServiceImpl;
 
     @PostMapping
-    public ResponseEntity<AuthorDTO> createAuthor(@RequestBody AuthorDTO authorDTO) {
+    public ResponseEntity<Object> createAuthor(@RequestBody AuthorDTO authorDTO, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        if (!validateToken(token)) {
+            return ResponseEntity.status(401).body(createErrorResponse("Invalid or missing token"));
+        }
+
+        int employeeIdFromToken = JwtUtils.extractEmployeeId(token);
+        if (authorDTO.getEmployeeId() != employeeIdFromToken) {
+            return ResponseEntity.badRequest().body(createErrorResponse("Employee ID in request does not match the token."));
+        }
+
         return ResponseEntity.ok(authorService.createAuthor(authorDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable int id) {
-        return ResponseEntity.ok(authorService.getAuthorById(id));
+    public ResponseEntity<Object> getAuthorById(@PathVariable int id, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        if (!validateToken(token)) {
+            return ResponseEntity.status(401).body(createErrorResponse("Invalid or missing token"));
+        }
+
+        int employeeIdFromToken = JwtUtils.extractEmployeeId(token);
+        AuthorDTO authorDTO = authorService.getAuthorById(id);
+        if (authorDTO.getEmployeeId() != employeeIdFromToken) {
+            return ResponseEntity.status(403).body(createErrorResponse("You are not authorized to access this author."));
+        }
+
+        return ResponseEntity.ok(authorDTO);
     }
 
     @GetMapping
-    public ResponseEntity<List<AuthorDTO>> getAllAuthors() {
-        return ResponseEntity.ok(authorService.getAllAuthors());
+    public ResponseEntity<Object> getAllAuthors(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        if (!validateToken(token)) {
+            return ResponseEntity.status(401).body(createErrorResponse("Invalid or missing token"));
+        }
+
+        int employeeIdFromToken = JwtUtils.extractEmployeeId(token);
+        List<AuthorDTO> authors = authorService.getAllAuthors();
+        authors.removeIf(author -> author.getEmployeeId() != employeeIdFromToken); // Filter out authors not belonging to the employee
+
+        return ResponseEntity.ok(authors);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AuthorDTO> updateAuthor(@PathVariable int id, @RequestBody AuthorDTO authorDTO) {
+    public ResponseEntity<Object> updateAuthor(@PathVariable int id, @RequestBody AuthorDTO authorDTO, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        if (!validateToken(token)) {
+            return ResponseEntity.status(401).body(createErrorResponse("Invalid or missing token"));
+        }
+
+        int employeeIdFromToken = JwtUtils.extractEmployeeId(token);
+        if (authorDTO.getEmployeeId() != employeeIdFromToken) {
+            return ResponseEntity.badRequest().body(createErrorResponse("Employee ID in request does not match the token."));
+        }
+
         return ResponseEntity.ok(authorService.updateAuthor(id, authorDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAuthor(@PathVariable int id) {
+    public ResponseEntity<Object> deleteAuthor(@PathVariable int id, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        if (!validateToken(token)) {
+            return ResponseEntity.status(401).body(createErrorResponse("Invalid or missing token"));
+        }
+
+        int employeeIdFromToken = JwtUtils.extractEmployeeId(token);
+        AuthorDTO authorDTO = authorService.getAuthorById(id);
+        if (authorDTO.getEmployeeId() != employeeIdFromToken) {
+            return ResponseEntity.status(403).body(createErrorResponse("You are not authorized to delete this author."));
+        }
+
         return ResponseEntity.ok(authorService.deleteAuthor(id));
     }
 
     @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<AuthorDTO>> getAuthorsByEmployeeId(@PathVariable int employeeId) {
+    public ResponseEntity<Object> getAuthorsByEmployeeId(@PathVariable int employeeId, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        if (!validateToken(token)) {
+            return ResponseEntity.status(401).body(createErrorResponse("Invalid or missing token"));
+        }
+
+        int employeeIdFromToken = JwtUtils.extractEmployeeId(token);
+        if (employeeId != employeeIdFromToken) {
+            return ResponseEntity.status(403).body(createErrorResponse("You are not authorized to access authors for this employee ID."));
+        }
+
         try {
             List<AuthorDTO> authors = authorService.getAuthorsByEmployeeId(employeeId);
             if (authors.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-            return ResponseEntity.ok(authors);
+//            return ResponseEntity.ok(authors);
+            String newToken = JwtUtils.generateToken(employeeIdFromToken, JwtUtils.extractEmployeeName(token));
+            return ResponseEntity.ok().header("Authorization", "Bearer " + newToken).body(authors);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse("An error occurred while retrieving authors."));
         }
     }
 
+    // Helper methods to extract and validate token
+    private String extractToken(String authorizationHeader) {
+        return authorizationHeader != null && authorizationHeader.startsWith("Bearer ")
+                ? authorizationHeader.substring(7)
+                : null;
+    }
 
+    private boolean validateToken(String token) {
+        return token != null && JwtUtils.validateToken(token);
+    }
 
+    private Map<String, String> createErrorResponse(String message) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", message);
+        return errorResponse;
+    }
 
     @RestControllerAdvice
     public class GlobalExceptionHandler {
@@ -134,5 +150,4 @@ public class AuthorController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
-
 }
