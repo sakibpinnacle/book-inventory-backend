@@ -1,12 +1,8 @@
 package com.test.RegisterLogin.EmployeeController;
 
-import com.test.RegisterLogin.Dto.EployeeDTO;
-import com.test.RegisterLogin.Dto.ForgotPasswordRequest;
-import com.test.RegisterLogin.Dto.LoginDTO;
-import com.test.RegisterLogin.Service.ForgotPasswordService;
+import com.test.RegisterLogin.Dto.*;
 import com.test.RegisterLogin.response.LoginResponse;
 import com.test.RegisterLogin.Service.EmployeeService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.Authentication;
@@ -35,20 +31,17 @@ public class EmployeeController {
     }
 
 
-
-    @Autowired
-    private ForgotPasswordService forgotPasswordService;
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
-        // Handle forgot password logic here
-        forgotPasswordService.sendEmail(request.getEmail());
-        return ResponseEntity.ok("A new password has been sent to your email.");
+    @PostMapping(path = "/send-new-password")
+    public ResponseEntity<String> sendNewPassword(@RequestBody SendNewPasswordDTO sendNewPasswordDTO) {
+        System.out.println("Request received to send new password for email: " + sendNewPasswordDTO.getEmail());
+        String response = employeeService.sendNewPassword(sendNewPasswordDTO);
+        return ResponseEntity.ok(response);
     }
-
-
-
-
+    @PostMapping(path = "/verify-and-update-password")
+    public ResponseEntity<String> verifyAndUpdatePassword(@RequestBody VerifyAndUpdatePasswordDTO verifyAndUpdatePasswordDTO) {
+        String response = employeeService.verifyAndUpdatePassword(verifyAndUpdatePasswordDTO);
+        return ResponseEntity.ok(response);
+    }
 
 
 }
